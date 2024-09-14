@@ -34,14 +34,13 @@ if __name__ == '__main__':
 
     starting_epoch_idx = int(input())
 
-
     # load cuda
     device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
     print('Device: {}'.format(device))
-    
+
     # load weight
     LOAD_ENV_PATH = os.path.join(model_load_path, 'epoch_{}.pth'.format(starting_epoch_idx))
-    model = RawNet(parser1['model'])
+    model = RawNet(parser1['model'],device)
     model.load_state_dict(torch.load(LOAD_ENV_PATH, weights_only=True))
     print("Load model from " + LOAD_ENV_PATH)
 
