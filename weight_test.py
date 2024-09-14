@@ -34,11 +34,14 @@ if __name__ == '__main__':
 
     starting_epoch_idx = int(input())
 
-
+    # load cuda
+    device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+    print('Device: {}'.format(device))
+    
     # load weight
     LOAD_ENV_PATH = os.path.join(model_load_path, 'epoch_{}_new.pth'.format(starting_epoch_idx))
 
-    model = RawNet(parser1['model'])
+    model = RawNet(parser1['model'],device)
     optimizer = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = weight_decay)
 
     print("Load model from " + LOAD_ENV_PATH)
