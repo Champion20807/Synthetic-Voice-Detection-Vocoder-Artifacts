@@ -10,6 +10,7 @@ from torch import nn
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 from model import RawNet
+from model_transformer import RawNetWithTransformer
 from core_scripts.startup_config import set_random_seed
 from pdb import set_trace
 from tqdm import tqdm
