@@ -176,17 +176,31 @@ if __name__ == '__main__':
     print('Device: {}'.format(device))
 
     # init model
-    LOAD_ENV_PATH = os.path.join(model_load_path, 'epoch_{}.pth'.format(starting_epoch_idx))
-    model = RawNetWithTransformer(config['model'], device).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = weight_decay)
+    if starting_epoch_idx == -1:
+         model = RawNetWithTransformer(parser1['model'], device).to(device)
+         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+        
+         # Save the initialized model as epoch_0.pth
+         initial_model_path = os.path.join(model_save_path, 'epoch_start.pth')
+         torch.save({
+             'epoch': -1,
+             'model_state_dict': model.state_dict(),
+             'optimizer_state_dict': optimizer.state_dict(),
+             'loss': 0.0,  # Initial loss
+         }, initial_model_path)
+         print(f'Saved initial model as epoch_start.pth')
+    else:
+        LOAD_ENV_PATH = os.path.join(model_load_path, 'epoch_{}.pth'.format(starting_epoch_idx))
+        model = RawNetWithTransformer(parser1['model'], device).to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = weight_decay)
 
-    print("Load model from " + LOAD_ENV_PATH)
-    checkpoint = torch.load(LOAD_ENV_PATH, weights_only=True)
+        print("Load model from " + LOAD_ENV_PATH)
+        checkpoint = torch.load(LOAD_ENV_PATH, weights_only=True)
 
-    model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    epoch_idx = checkpoint['epoch']
-    loss = checkpoint['loss']
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epoch_idx = checkpoint['epoch']
+        loss = checkpoint['loss']
     LAMDA = 0.5
 
     if not os.path.exists(model_save_path):
@@ -290,13 +304,11 @@ for epoch in range(starting_epoch_idx + 1, num_epochs):
         }, best_model_path)
         print(f'Best model saved at epoch {epoch}')
     
-    # Save most recent model
-    recent_model_path = os.path.join(model_save_path, 'most_recent_epoch.pth')
+    # torch.save(model.state_dict(), os.path.join(model_save_path, 'epoch_{}.pth'.format(epoch)))
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'loss': running_loss,
-    }, recent_model_path)
-    print(f'Saved epoch_{epoch} as most_recent_epoch.pth')
+        }, os.path.join(model_save_path, 'epoch_{}.pth'.format(epoch)))
 
