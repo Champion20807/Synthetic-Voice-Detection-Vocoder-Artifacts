@@ -9,8 +9,7 @@ import torch
 from torch import nn
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
-from model import RawNet
-from model_transformer import RawNetWithTransformer
+from model_encoder_only import RawNetWithTransformer
 from core_scripts.startup_config import set_random_seed
 from pdb import set_trace
 from tqdm import tqdm
@@ -21,7 +20,7 @@ starting_epoch_idx = int(input())
 SAMPLE_RATE = 24000
 
 class Dataset_LibriSeVoc(Dataset):
-    
+                                       
     def __init__(self, dataset_path, split = 'train'):
             self.dataset_path = dataset_path
             
