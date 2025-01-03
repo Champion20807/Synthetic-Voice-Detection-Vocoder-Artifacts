@@ -174,18 +174,36 @@ if __name__ == '__main__':
     device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
     print('Device: {}'.format(device))
 
+
+    if starting_epoch_idx == -1:
+        model = RawNet(parser1['model'], device).to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+
+        # Save the initialized model as epoch_start.pth
+        initial_model_path = os.path.join(model_save_path, 'epoch_start.pth')
+        torch.save({
+            'epoch': -1,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': 0.0,  # Initial loss
+        }, initial_model_path)
+        print(f'Saved initial model as epoch_start.pth')
+    else:
+        LOAD_ENV_PATH = os.path.join(model_load_path, f'epoch_{starting_epoch_idx}.pth')
+        model = RawNet(parser1['model'], device).to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+
+        print(f"Load model from {LOAD_ENV_PATH}")
+        checkpoint = torch.load(LOAD_ENV_PATH, map_location=device)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epoch_idx = checkpoint['epoch']
+        loss = checkpoint['loss']
     # init model
     LOAD_ENV_PATH = os.path.join(model_load_path, 'epoch_{}.pth'.format(starting_epoch_idx))
-    model = RawNet(parser1['model'],device)
     optimizer = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = weight_decay)
 
-    print("Load model from " + LOAD_ENV_PATH)
-    checkpoint = torch.load(LOAD_ENV_PATH, weights_only=True)
 
-    model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    epoch_idx = checkpoint['epoch']
-    loss = checkpoint['loss']
     LAMDA = 0.5
 
     if not os.path.exists(model_save_path):
