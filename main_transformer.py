@@ -172,7 +172,7 @@ if __name__ == '__main__':
         parser1 = yaml.safe_load(f_yaml)
 
     # load cuda
-    device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     print('Device: {}'.format(device))
 
     # init model
