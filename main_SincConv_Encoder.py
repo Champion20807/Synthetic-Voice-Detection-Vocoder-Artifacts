@@ -8,7 +8,7 @@ import random
 import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader, Dataset
-from model_SinConv_Transformer import RawNetWithTransformer
+from model_SincConv_Encoder import RawNetWithTransformer
 from core_scripts.startup_config import set_random_seed
 from pdb import set_trace
 from tqdm import tqdm
@@ -158,6 +158,19 @@ if __name__ == '__main__':
     weight_decay = args.weight_decay
 
 
+    d_args = {
+        'hidden_size': 128,
+        'num_heads': 4,
+        'ffn_dim': 512,
+        'dropout': 0.1,
+        'num_layers': 2,
+        'nb_fc_node': 256,
+
+        'num_filters': 64,
+        'kernel_size': 375,
+        'sample_rate': 24000  
+    }   
+
     # Load datasets
     train_set = Dataset_LibriSeVoc(split='train', dataset_path=data_path)
     train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=False)
@@ -175,7 +188,7 @@ if __name__ == '__main__':
 
     # Initialize model
     if starting_epoch_idx == -1:
-        model = RawNetWithSincConvTransformer(d_args, device).to(device)
+        model = RawNetWithTransformer(parser1['model'], device).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
         # Save the initialized model as epoch_start.pth
@@ -189,7 +202,7 @@ if __name__ == '__main__':
         print(f'Saved initial model as epoch_start.pth')
     else:
         LOAD_ENV_PATH = os.path.join(model_load_path, f'epoch_{starting_epoch_idx}.pth')
-        model = RawNetWithSincConvTransformer(d_args, device).to(device)
+        model = RawNetWithTransformer(parser1['model'], device).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
         print(f"Load model from {LOAD_ENV_PATH}")

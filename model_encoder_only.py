@@ -8,6 +8,7 @@ class RawNetWithTransformer(nn.Module):
         super(RawNetWithTransformer, self).__init__()
         
         self.device = device
+
         self.encoder_layer = nn.TransformerEncoderLayer(
             d_model=d_args['hidden_size'], 
             nhead=d_args['num_heads'], 
@@ -26,20 +27,20 @@ class RawNetWithTransformer(nn.Module):
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
-        # Input: (batch, seq_len)
+        # Input -> (batch, seq_len)
         nb_samp = x.shape[0]
         len_seq = x.shape[1]
-        x = x.view(nb_samp, len_seq, 1)  # Add feature dimension
-        
-        # Transform input for Transformer Encoder (batch, seq_len, feature_dim)
-        x = x.permute(1, 0, 2)  # (batch, seq_len, feature_dim) -> (seq_len, batch, feature_dim)
+        x = x.view(nb_samp, len_seq, 1)  # (batch, seq_len, 1)
+        x = x.permute(1, 0, 2)  # (seq_len, batch, 1)
+
+        # Transformer encoder + Mean Pooling
         x = self.transformer_encoder(x)  # (seq_len, batch, hidden_size)
-        x = x.mean(dim=0)  # Average pooling over sequence length (batch, hidden_size)
+        x = x.mean(dim=0)  # (batch, hidden_size)
         
         # Fully connected layers
-        x = self.fc1(x)
-        x_binary = self.fc2_binary(x)
-        x_multi = self.fc2_multi(x)
+        x = self.fc1(x)  # (batch, nb_fc_node)
+        x_binary = self.fc2_binary(x)  # (batch, 2)
+        x_multi = self.fc2_multi(x)  # (batch, 7)
         
         output_binary = self.logsoftmax(x_binary)
         output_multi = self.logsoftmax(x_multi)

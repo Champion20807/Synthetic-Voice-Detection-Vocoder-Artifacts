@@ -157,12 +157,12 @@ if __name__ == '__main__':
     weight_decay = args.weight_decay
 
     d_args = {
-    'hidden_size': 256,  # Transformer hidden layer size
-    'num_heads': 4,      # Number of attention heads
-    'ffn_dim': 512,      # Feedforward network dimension
-    'dropout': 0.1,      # Dropout rate
-    'num_layers': 4,     # Number of Transformer layers
-    'nb_fc_node': 128    # Fully connected layer size
+        'hidden_size': 128,
+        'num_heads': 4,
+        'ffn_dim': 512,
+        'dropout': 0.1, 
+        'num_layers': 2,
+        'nb_fc_node': 256
     }
 
     # load dataset
@@ -180,7 +180,7 @@ if __name__ == '__main__':
         parser1 = yaml.safe_load(f_yaml)
 
     # load cuda
-    device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     print('Device: {}'.format(device))
 
     # init model

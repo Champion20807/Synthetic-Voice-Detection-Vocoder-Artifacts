@@ -174,7 +174,8 @@ if __name__ == '__main__':
     device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
     print('Device: {}'.format(device))
 
-
+    # init model
+    
     if starting_epoch_idx == -1:
         model = RawNet(parser1['model'], device).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -199,9 +200,7 @@ if __name__ == '__main__':
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         epoch_idx = checkpoint['epoch']
         loss = checkpoint['loss']
-    # init model
-    LOAD_ENV_PATH = os.path.join(model_load_path, 'epoch_{}.pth'.format(starting_epoch_idx))
-    optimizer = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = weight_decay)
+    
 
 
     LAMDA = 0.5
@@ -286,18 +285,20 @@ if __name__ == '__main__':
 
 
 best_acc = 99
+
 for epoch in range(starting_epoch_idx+1,num_epochs):
     running_loss, train_accuracy, out_write = train_epoch(train_dataloader, model, lr, optimizer, device, lamda = LAMDA)
     valid_accuracy = evaluate_accuracy(dev_dataloader, model, device)
     print(out_write)
     print('epoch: {} -loss: {}  - valid binary accuracy: {:.2f}'.format(epoch, running_loss, valid_accuracy))
+    
     if valid_accuracy > best_acc:
         print('best model find at epoch', epoch)
     best_acc = max(valid_accuracy, best_acc)
-    # torch.save(model.state_dict(), os.path.join(model_save_path, 'epoch_{}.pth'.format(epoch)))
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'loss': running_loss,
         }, os.path.join(model_save_path, 'epoch_{}.pth'.format(epoch)))
+
